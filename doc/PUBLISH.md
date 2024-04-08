@@ -18,3 +18,9 @@ you can see the name of the package running `npm -g list`
 ```
 npm version prerelease --preid=alpha
 ```
+
+## publish tags
+
+```
+git push --tags
+```

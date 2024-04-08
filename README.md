@@ -7,8 +7,6 @@ Promise based Fetch wrapper.
 ```js
 const { http } = require('mi-causa')
 
-console.log("http", http);
-
 const config = {
   baseURL: 'https://dummyjson.com',
 }
