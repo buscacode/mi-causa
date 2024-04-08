@@ -4,13 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  typescript:
+    specifier: ^5.4.3
+    version: 5.4.3
+
 devDependencies:
   '@types/node':
     specifier: ^20.11.30
     version: 20.11.30
-  typescript:
-    specifier: ^5.4.3
-    version: 5.4.3
 
 packages:
 
@@ -24,7 +26,7 @@ packages:
     resolution: {integrity: sha512-KrPd3PKaCLr78MalgiwJnA25Nm8HAmdwN3mYUYZgG/wizIo9EainNVQI9/yDavtVFRN2h3k8uf3GLHuhDMgEHg==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
+    dev: false
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}

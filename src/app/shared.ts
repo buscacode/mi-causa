@@ -1,7 +1,7 @@
 import { Config, HttpData } from "src/app.types"
 import { doesExist } from "./utils"
 import { HttpRequestError } from "./errors/HttpRequest.error"
-import HttpUrlError from "./errors/HttpUrl.error"
+import { HttpUrlError } from "./errors/HttpUrl.error"
 
 
 export const mergeConfig = (initialConfig: Config, newConfig: Config) => {

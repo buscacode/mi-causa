@@ -1,5 +1,4 @@
-import * as http from './app'
+import { http } from './app'
+export * from './app'
 export * from './app.types'
 export default http
-
-
