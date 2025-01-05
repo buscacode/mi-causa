@@ -1,4 +1,4 @@
-import type { Config, HttpData } from 'src/app.types'
+import type { Config, HttpData } from 'src/app/app.types'
 import { Action } from './enums/http.enums'
 import { HttpResponseError } from './errors/HttpResponse.error'
 import { defineBody, formatQueryParams, formatUrl, mergeConfig } from './shared'

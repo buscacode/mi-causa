@@ -1,5 +1,5 @@
-import type { Action } from './app/enums/http.enums'
-export type { HttpInstance } from './app/http'
+import type { Action } from './enums/http.enums'
+export type { HttpInstance } from './http'
 
 export type RequestTransformer<R> = (data: R, headers: Headers) => R
 export type ResponseTransformer<R> = (data: R) => R

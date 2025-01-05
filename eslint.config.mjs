@@ -43,7 +43,9 @@ export default tseslint.config(
   {
     files: [
       '__tests__/**/*.[jt]s',
+      '__mocks__/**/*.[jt]s',
       '**/__tests__/**/*.[jt]s',
+      '**/__mocks__/**/*.[jt]s',
       '**/?(*.)+(spec|test).[jt]s/**'
     ], // or any other pattern
     plugins: {
@@ -59,6 +61,10 @@ export default tseslint.config(
     },
     languageOptions: {
       parser: parser,
+      parserOptions: {
+        project: './tsconfig.json'
+        // tsconfigRootDir: process.cwd()
+      },
       globals: {
         ...vitest.environments.env.globals,
         ...globals.node

@@ -1,9 +1,10 @@
+import path from 'path'
 import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
     environment: 'node',
-    globals: false,
+    globals: true,
     coverage: {
       provider: 'istanbul',
       reporter: ['lcov', 'json', 'html', 'text'],
@@ -16,11 +17,25 @@ export default defineConfig({
         ...configDefaults.exclude,
         '**/*.{mjs,cjs}',
         '**/dist/**',
-        '**/__test__/**',
+        '**/__tests__/**',
+        '**/__mocks__/**',
         '**/node_modules/**'
       ],
-      include: ['packages/**/*.{ts,js,tsx,jsx}'],
+      include: ['src/**/*.{ts,js,tsx,jsx}'],
       all: true
-    }
+    },
+    setupFiles: ['./__mocks__/setup.ts']
+  },
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: path.resolve(__dirname, 'src')
+      },
+      {
+        find: '@/',
+        replacement: path.resolve(__dirname, 'src/')
+      }
+    ]
   }
 })
