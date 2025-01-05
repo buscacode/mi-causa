@@ -1,4 +1,4 @@
-import BaseError from "./Base.error"
+import BaseError from './Base.error'
 
 export class HttpUrlError extends BaseError {
   constructor(message: string, friendlyMessage?: string) {

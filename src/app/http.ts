@@ -1,13 +1,13 @@
-import { HttpResponseError } from "./errors/HttpResponse.error";
-import { Action } from "./enums/http.enums";
-import { defineBody, formatQueryParams, formatUrl, mergeConfig } from "./shared";
-import { Config, HttpData } from "src/app.types";
+import type { Config, HttpData } from 'src/app.types'
+import { Action } from './enums/http.enums'
+import { HttpResponseError } from './errors/HttpResponse.error'
+import { defineBody, formatQueryParams, formatUrl, mergeConfig } from './shared'
 
 const defaultConfig: Config = {
   method: Action.GET,
   headers: {
-    "Content-Type": "application/json"
-  },
+    'Content-Type': 'application/json'
+  }
 }
 
 const fetchHttp = async (url: string, config?: Config) => {
@@ -19,41 +19,54 @@ const fetchHttp = async (url: string, config?: Config) => {
   const fetchInit: RequestInit = {
     body: bodyData,
     headers: config?.headers,
-    method: config?.method,
+    method: config?.method
   }
 
-  try {
-    const response = await fetch(urlFull, fetchInit)
-    if (!response.ok) {
-      throw new HttpResponseError(response.statusText, response);
-    }
-    return response;
-  } catch (error) {
-    throw error
+  const response = await fetch(urlFull, fetchInit)
+  if (!response.ok) {
+    throw new HttpResponseError(response.statusText, response)
   }
+  return response
 }
 
 export interface HttpInstance {
-  get: (url: string, config?: Omit<Config, 'method' | 'data'> ) => Promise<Response>
-  post: (url: string, data?: HttpData, config?: Omit<Config, 'method' | 'data'> ) => Promise<Response>
-  put: (url: string, data?: HttpData, config?: Omit<Config, 'method' | 'data'> ) => Promise<Response>
-  patch: (url: string, data?: HttpData, config?: Omit<Config, 'method' | 'data'> ) => Promise<Response>
-  delete: (url: string, config?: Omit<Config, 'method' | 'data'> ) => Promise<Response>
+  get: (
+    url: string,
+    config?: Omit<Config, 'method' | 'data'>
+  ) => Promise<Response>
+  post: (
+    url: string,
+    data?: HttpData,
+    config?: Omit<Config, 'method' | 'data'>
+  ) => Promise<Response>
+  put: (
+    url: string,
+    data?: HttpData,
+    config?: Omit<Config, 'method' | 'data'>
+  ) => Promise<Response>
+  patch: (
+    url: string,
+    data?: HttpData,
+    config?: Omit<Config, 'method' | 'data'>
+  ) => Promise<Response>
+  delete: (
+    url: string,
+    config?: Omit<Config, 'method' | 'data'>
+  ) => Promise<Response>
 }
 
 export function create(config: Config): HttpInstance {
-
   const currentConfig = mergeConfig(defaultConfig, config)
 
   return {
-    get: async (url, config? ) => {
+    get: async (url) => {
       const fetchConfig: Config = {
         ...currentConfig,
         method: Action.GET
       }
       return fetchHttp(url, fetchConfig)
     },
-    post: async (url, data?: HttpData, config? ) => {
+    post: async (url, data?: HttpData) => {
       const fetchConfig: Config = {
         ...currentConfig,
         method: Action.POST,
@@ -61,7 +74,7 @@ export function create(config: Config): HttpInstance {
       }
       return fetchHttp(url, fetchConfig)
     },
-    put: async (url, data?: HttpData, config? ) => {
+    put: async (url, data?: HttpData) => {
       const fetchConfig: Config = {
         ...currentConfig,
         method: Action.PUT,
@@ -69,7 +82,7 @@ export function create(config: Config): HttpInstance {
       }
       return fetchHttp(url, fetchConfig)
     },
-    patch: async (url, data?: HttpData, config? ) => {
+    patch: async (url, data?: HttpData) => {
       const fetchConfig: Config = {
         ...currentConfig,
         method: Action.PATCH,
@@ -77,10 +90,10 @@ export function create(config: Config): HttpInstance {
       }
       return fetchHttp(url, fetchConfig)
     },
-    delete: async (url, config? ) => {
+    delete: async (url) => {
       const fetchConfig: Config = {
         ...currentConfig,
-        method: Action.DELETE,
+        method: Action.DELETE
       }
       return fetchHttp(url, fetchConfig)
     }

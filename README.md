@@ -1,6 +1,6 @@
 # mi-causa
-Promise based Fetch wrapper.
 
+Promise based Fetch wrapper.
 
 ## Node js
 
@@ -8,14 +8,15 @@ Promise based Fetch wrapper.
 const { http } = require('mi-causa')
 
 const config = {
-  baseURL: 'https://dummyjson.com',
+  baseURL: 'https://dummyjson.com'
 }
 
 let api = http.create(config)
 
-api.get('/products').then((data)=>data.json())
-.then((data) => console.log(data))
-
+api
+  .get('/products')
+  .then((data) => data.json())
+  .then((data) => console.log(data))
 ```
 
 ## Typescript
@@ -24,11 +25,13 @@ api.get('/products').then((data)=>data.json())
 import http, { type Config } from 'mi-causa'
 
 const config: Config = {
-  baseURL: 'https://dummyjson.com/',
+  baseURL: 'https://dummyjson.com/'
 }
 
 let api = http.create(config)
 
-api.get('/products').then((data)=>data.json())
-.then((data) => console.log(data))
+api
+  .get('/products')
+  .then((data) => data.json())
+  .then((data) => console.log(data))
 ```

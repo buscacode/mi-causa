@@ -1,1 +1,1 @@
-export * from "./http.enums"
+export * from './http.enums'

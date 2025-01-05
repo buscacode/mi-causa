@@ -1,4 +1,3 @@
-
 export default class BaseError extends Error {
   quickMessage: string
   constructor(message: string, friendlyMessage?: string) {
@@ -7,7 +6,7 @@ export default class BaseError extends Error {
     this.name = 'BaseError'
   }
 
-  getMessage(){
+  getMessage() {
     return `${this.name}: ${this.message}`
   }
 }

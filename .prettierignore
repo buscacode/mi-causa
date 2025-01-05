@@ -1,0 +1,9 @@
+public
+build
+dist
+coverage
+
+.cache
+pnpm-lock.yaml
+**/dist
+.astro
