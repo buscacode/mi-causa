@@ -24,7 +24,13 @@ export default defineConfig({
       include: ['src/**/*.{ts,js,tsx,jsx}'],
       all: true
     },
-    setupFiles: ['./__mocks__/setup.ts']
+    setupFiles: ['./__mocks__/setup.ts'],
+    // to avoid the Multi-threading default of vitest
+    poolOptions: {
+      forks: {
+        singleFork: true
+      }
+    }
   },
   resolve: {
     alias: [

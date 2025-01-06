@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --dts",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --pool=forks",
+    "test:watch": "vitest --pool=forks",
     "coverage": "vitest run --coverage",
     "coverage:open": "vitest run --coverage && open-cli coverage/lcov-report/index.html",
     "coverage:verify-lcov": "lcov-total ./coverage/lcov.info && lcov-total ./coverage/lcov.info --gte=50",
@@ -55,6 +55,7 @@
     "globals": "15.14.0",
     "husky": "9.1.7",
     "lcov-total": "2.1.1",
+    "msw": "2.7.0",
     "open-cli": "8.0.0",
     "prettier": "3.4.2",
     "typescript": "5.4.3",

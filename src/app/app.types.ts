@@ -15,6 +15,8 @@ export interface Config {
   headers?: Record<string, string>
   params?: Record<string, string>
   data?: HttpData
+  signal?: AbortSignal
+  cache?: RequestCache
   //body?: BodyInit
 }
 
