@@ -27,3 +27,9 @@ npm version prerelease --preid=alpha
 ```
 git push --tags
 ```
+
+### view versions
+
+```
+pnpm view mi-causa versions
+```
