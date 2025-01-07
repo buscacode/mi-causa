@@ -121,7 +121,7 @@ describe('Http file', () => {
 
     setTimeout(() => {
       controller.abort()
-    }, 300)
+    }, 100)
 
     let response: Response | undefined
     let capturedError: Error | undefined
@@ -137,5 +137,112 @@ describe('Http file', () => {
     expect(response).toBeUndefined()
     expect(capturedError).toBeDefined()
     expect(capturedError?.name).toBe('AbortError')
+  })
+
+  test('should recibe a response from post', async () => {
+    server.use(
+      rest.post('https://buscacode.com/api/greetings', async ({ request }) => {
+        const body = await request.json()
+        return HttpResponse.json({ body })
+      })
+    )
+
+    const response = await http.post('/api/greetings', { name: 'John Doe' })
+
+    const data = await response.json()
+    expect(response.ok).toBe(true)
+    expect(data.body).toStrictEqual({ name: 'John Doe' })
+  })
+
+  test('should post and recibe a success response only with access token and path id', async () => {
+    server.use(
+      rest.post(
+        'https://buscacode.com/api/user/:userId/pet',
+        ({ request, params }) => {
+          const token = request.headers.get('Authorization-token')
+
+          if (token !== 'Bearer token') {
+            return HttpResponse.json(
+              { message: 'Not Authenticated' },
+              { status: 401 }
+            )
+          }
+
+          const userId = Number(params.userId)
+          if (userId !== 1) {
+            return HttpResponse.json(
+              { message: 'Bad user id' },
+              { status: 400 }
+            )
+          }
+
+          return HttpResponse.json({ userId })
+        }
+      )
+    )
+
+    let response: Response | undefined
+    try {
+      response = await http.post(
+        '/api/user/1/pet',
+        {
+          name: 'ばつ',
+          type: '猫'
+        },
+        {
+          headers: {
+            'authorization-token': 'Bearer token'
+          }
+        }
+      )
+    } catch (error) {
+      if (error instanceof HttpResponseError) {
+        response = error.response
+      }
+    }
+    if (response === undefined) throw Error('Without Response')
+    const data = await response.json()
+    expect(response.ok).toBe(true)
+    expect(data.userId).toBe(1)
+
+    response = undefined
+    try {
+      response = await http.post('https://buscacode.com/api/user/2/pet', null, {
+        headers: {
+          'authorization-token': 'Bearer token'
+        }
+      })
+    } catch (error) {
+      if (error instanceof HttpResponseError) {
+        response = error.response
+      }
+    }
+
+    if (response === undefined) throw Error('Without Response')
+    const data2 = await response.json()
+    expect(response.ok).toBe(false)
+    expect(response.status).toBe(400)
+    expect(response.statusText).toBe('Bad Request')
+    expect(data2.message).toBe('Bad user id')
+
+    response = undefined
+    try {
+      response = await http.post('https://buscacode.com/api/user/2/pet', null, {
+        headers: {
+          'authorization-token': 'Bearer 123'
+        }
+      })
+    } catch (error) {
+      if (error instanceof HttpResponseError) {
+        response = error.response
+      }
+    }
+
+    if (response === undefined) throw Error('Without Response')
+    const data3 = await response.json()
+    expect(response.ok).toBe(false)
+    expect(response.status).toBe(401)
+    expect(response.statusText).toBe('Unauthorized')
+    expect(data3.message).toBe('Not Authenticated')
   })
 })

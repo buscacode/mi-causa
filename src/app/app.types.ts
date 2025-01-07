@@ -7,6 +7,8 @@ export type ResponseTransformer<R> = (data: R) => R
 export type create = () => void
 export type HttpData =
   | string
+  | FormData
+  | null
   | Record<string, string | number | null | undefined | Record<string, unknown>>
 
 export interface Config {
