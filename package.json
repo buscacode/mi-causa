@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsup src/index.ts --dts",
+    "publish:package": "pnpm run build && pnpm publish",
     "test": "vitest run --pool=forks",
     "test:watch": "vitest --pool=forks",
     "coverage": "vitest run --coverage",
