@@ -1,8 +1,17 @@
-import type { Config, HttpData } from 'src/app/app.types'
+import type {
+  Config,
+  HttpData,
+  InterceptorQueue,
+  Interceptors
+} from 'src/app/app.types'
+import type { HttpInstance } from './app.types'
 import { Action } from './enums/http.enums'
 import { HttpResponseError } from './errors/HttpResponse.error'
+import { generateInterceptor } from './interceptors'
 import { defineBody, formatQueryParams, formatUrl, mergeConfig } from './shared'
 
+/* const defaultHeader = new Headers()
+defaultHeader.append('content-type', 'application/json') */
 const defaultConfig: Config = {
   method: Action.GET,
   headers: {
@@ -10,9 +19,22 @@ const defaultConfig: Config = {
   }
 }
 
-const fetchHttp = async (url: string, config?: Config) => {
-  const fetchUrl = formatUrl(url, config?.baseURL)
-  const fetchParams = formatQueryParams(config?.params)
+const fetchHttp = async (
+  url: string,
+  config: Config,
+  requestInterceptorQueue: InterceptorQueue<Config>,
+  responseInterceptorQueue: InterceptorQueue<Response>
+) => {
+  const newConfig = requestInterceptorQueue.reduce(
+    (calculatedConfig, fnArr) => {
+      const fn = fnArr[0]
+      return fn?.(calculatedConfig) ?? calculatedConfig
+    },
+    config
+  )
+
+  const fetchUrl = formatUrl(url, newConfig.baseURL)
+  const fetchParams = formatQueryParams(newConfig.params)
 
   const fetchUrlObject = new URL(fetchUrl)
   const urlSearchParams = new URLSearchParams(fetchUrlObject.search)
@@ -26,51 +48,46 @@ const fetchHttp = async (url: string, config?: Config) => {
   const urlFull = fullSearchParamsString
     ? `${fullUrlBaseAndPath}?${fullSearchParamsString}`
     : fullUrlBaseAndPath
-  const bodyData = defineBody(config?.data)
+
+  const bodyData = defineBody(newConfig.data)
 
   const fetchInit: RequestInit = {
     body: bodyData,
-    headers: config?.headers,
-    method: config?.method,
-    signal: config?.signal,
-    cache: config?.cache
+    headers: newConfig.headers,
+    method: newConfig.method,
+    signal: newConfig.signal,
+    cache: newConfig.cache
   }
 
   const response = await fetch(urlFull, fetchInit)
   if (!response.ok) {
-    throw new HttpResponseError(response.statusText, response)
+    const error = new HttpResponseError(response.statusText, response)
+    const newError = await responseInterceptorQueue.reduce(
+      (calculatedError, fnArr) => {
+        const fn = fnArr[1]
+        if (fn === undefined || fn === null) return calculatedError
+        return fn(calculatedError)
+      },
+      error
+    )
+
+    throw newError
   }
   return response
 }
 
-export interface HttpInstance {
-  get: (
-    url: string,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
-  post: (
-    url: string,
-    data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
-  put: (
-    url: string,
-    data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
-  patch: (
-    url: string,
-    data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
-  delete: (
-    url: string,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
-}
-
 export function createHttp(config: Config): HttpInstance {
   const currentConfig = mergeConfig(defaultConfig, config)
+
+  const [requestInterceptors, requestInterceptorController] =
+    generateInterceptor<Config>()
+  const [responseInterceptors, responseInterceptorController] =
+    generateInterceptor<Response>()
+
+  const interceptors: Interceptors = {
+    request: requestInterceptorController,
+    response: responseInterceptorController
+  }
 
   return {
     get: async (url, config = {}) => {
@@ -79,7 +96,12 @@ export function createHttp(config: Config): HttpInstance {
         ...mergeConfig(currentConfig, config),
         method: Action.GET
       }
-      return fetchHttp(url, fetchConfig)
+      return fetchHttp(
+        url,
+        fetchConfig,
+        requestInterceptors,
+        responseInterceptors
+      )
     },
     post: async (url, data?: HttpData, config = {}) => {
       const fetchConfig: Config = {
@@ -88,7 +110,12 @@ export function createHttp(config: Config): HttpInstance {
         method: Action.POST,
         data
       }
-      return fetchHttp(url, fetchConfig)
+      return fetchHttp(
+        url,
+        fetchConfig,
+        requestInterceptors,
+        responseInterceptors
+      )
     },
     put: async (url, data?: HttpData, config = {}) => {
       const fetchConfig: Config = {
@@ -97,7 +124,12 @@ export function createHttp(config: Config): HttpInstance {
         method: Action.PUT,
         data
       }
-      return fetchHttp(url, fetchConfig)
+      return fetchHttp(
+        url,
+        fetchConfig,
+        requestInterceptors,
+        responseInterceptors
+      )
     },
     patch: async (url, data?: HttpData, config = {}) => {
       const fetchConfig: Config = {
@@ -106,7 +138,12 @@ export function createHttp(config: Config): HttpInstance {
         method: Action.PATCH,
         data
       }
-      return fetchHttp(url, fetchConfig)
+      return fetchHttp(
+        url,
+        fetchConfig,
+        requestInterceptors,
+        responseInterceptors
+      )
     },
     delete: async (url, config = {}) => {
       const fetchConfig: Config = {
@@ -114,7 +151,13 @@ export function createHttp(config: Config): HttpInstance {
         ...mergeConfig(currentConfig, config),
         method: Action.DELETE
       }
-      return fetchHttp(url, fetchConfig)
-    }
+      return fetchHttp(
+        url,
+        fetchConfig,
+        requestInterceptors,
+        responseInterceptors
+      )
+    },
+    interceptors
   }
 }

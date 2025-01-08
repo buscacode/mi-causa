@@ -1,6 +1,6 @@
 import { HttpResponseError } from '@/app'
-import type { HttpInstance } from '@/app/http'
 import { createHttp } from '@/app/http'
+import type { HttpInstance } from '@/index'
 import { server } from '__mocks__/services'
 import { HttpResponse, http as rest } from 'msw'
 import {
@@ -244,5 +244,108 @@ describe('Http file', () => {
     expect(response.status).toBe(401)
     expect(response.statusText).toBe('Unauthorized')
     expect(data3.message).toBe('Not Authenticated')
+  })
+
+  test('should work the interceptor request', async () => {
+    server.use(
+      rest.put('https://buscacode.com/api/validate', async ({ request }) => {
+        const body = await request.json()
+        const authorization = request.headers.get('Authorization-token')
+        return HttpResponse.json({ body, authorization })
+      })
+    )
+
+    http = createHttp({ baseURL: 'https://buscacode.com/api' })
+    const tokenController = (() => {
+      let token: string | undefined
+
+      return {
+        getToken: () => token,
+        setToken: (newToken: string) => {
+          token = newToken
+        }
+      }
+    })()
+
+    const interceptor0 = http.interceptors.request.use((config) => {
+      const data = config.data
+      if (data !== null && typeof data !== 'string') {
+        config.data = { ...data, token: 123 }
+      }
+
+      return config
+    })
+
+    const interceptor1 = http.interceptors.request.use((config) => {
+      const headers = config.headers ?? {}
+      const token = tokenController.getToken()
+
+      headers['Authorization-token'] = `Bearer ${token}`
+      config.headers = headers
+      return config
+    })
+
+    const interceptor2 = http.interceptors.request.use((config) => {
+      const data = config.data
+      if (data !== null && typeof data !== 'string') {
+        config.data = { ...data, interceptor: 'interceptor2' }
+      }
+
+      return config
+    })
+
+    const interceptor3 = http.interceptors.response.use(null, (error) => {
+      return error
+    })
+
+    expect(interceptor0).toBe(0)
+    expect(interceptor1).toBe(1)
+    expect(interceptor2).toBe(2)
+    expect(interceptor3).toBe(0)
+
+    const response = await http.put('/validate', { dni: 11111111 })
+    const data = await response.json()
+
+    expect(data.body.token).toBe(123)
+    expect(data.authorization).toBe('Bearer undefined')
+
+    tokenController.setToken('token')
+    const response2 = await http.patch('https://buscacode.com/user', {
+      dni: 22222222
+    })
+    const data2 = await response2.json()
+    expect(data2.body.token).toBe(123)
+    expect(data2.body.dni).toBe(22222222)
+    expect(data2.body.interceptor).toBe('interceptor2')
+    expect(data2.authorization).toBe('Bearer token')
+
+    tokenController.setToken('abc')
+    let response3: Response | undefined
+    let capturedError: Error | undefined
+    try {
+      response3 = await http.patch('https://buscacode.com/user', {
+        dni: 22222222
+      })
+    } catch (error) {
+      capturedError = error as Error
+      if (error instanceof HttpResponseError) {
+        response3 = error.response
+      }
+    }
+
+    if (response3 === undefined) throw Error('Without Response')
+    const data3 = await response3.json()
+    expect(data3.message).toBe('Not Authenticated')
+    expect(capturedError).toBeDefined()
+    expect(capturedError).instanceOf(HttpResponseError)
+
+    tokenController.setToken('token')
+    http.interceptors.request.eject(interceptor2)
+    const response4 = await http.patch('https://buscacode.com/user', {
+      dni: 22222222
+    })
+    const data4 = await response4.json()
+    expect(data4.body.interceptor).not.toBeDefined()
+    expect(data4.authorization).toBe('Bearer token')
   })
 })
