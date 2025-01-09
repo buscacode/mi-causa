@@ -1,9 +1,24 @@
-import type { Config, HttpData } from 'src/app/app.types'
+import type { Config, HttpData, RequestConfig } from 'src/app/app.types'
 import { HttpRequestError } from './errors/HttpRequest.error'
 import { HttpUrlError } from './errors/HttpUrl.error'
 import { doesExist } from './utils'
 
-export const mergeConfig = (initialConfig: Config, newConfig: Config) => {
+export const mergeHeaders = (
+  initialHeader: Headers,
+  newHeader?: Headers | Record<string, string>
+) => {
+  const mergedHeaders = new Headers(initialHeader)
+  const header = new Headers(newHeader)
+  header?.forEach((value, key) => {
+    mergedHeaders.set(key, value)
+  })
+  return mergedHeaders
+}
+
+export const mergeConfig = (
+  initialConfig: Config,
+  newConfig: Config | RequestConfig
+) => {
   const {
     headers: initialHeaders,
     params: initialParams,
@@ -11,11 +26,10 @@ export const mergeConfig = (initialConfig: Config, newConfig: Config) => {
   } = initialConfig
   const { headers: newHeaders, params: newParams, ...newRest } = newConfig
 
-  const existInit = doesExist(initialHeaders, newHeaders)
   const returnConfig: Config = {
     ...initialRest,
     ...newRest,
-    headers: existInit ? { ...initialHeaders, ...newHeaders } : undefined,
+    headers: mergeHeaders(initialHeaders, newHeaders),
     params: doesExist(initialParams, newParams)
       ? { ...initialParams, ...newParams }
       : undefined

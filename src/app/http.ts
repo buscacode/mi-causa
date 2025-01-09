@@ -2,7 +2,8 @@ import type {
   Config,
   HttpData,
   InterceptorQueue,
-  Interceptors
+  Interceptors,
+  RequestConfig
 } from 'src/app/app.types'
 import type { HttpInstance } from './app.types'
 import { Action } from './enums/http.enums'
@@ -10,13 +11,11 @@ import { HttpResponseError } from './errors/HttpResponse.error'
 import { generateInterceptor } from './interceptors'
 import { defineBody, formatQueryParams, formatUrl, mergeConfig } from './shared'
 
-/* const defaultHeader = new Headers()
-defaultHeader.append('content-type', 'application/json') */
+const defaultHeader = new Headers()
+defaultHeader.append('content-type', 'application/json')
 const defaultConfig: Config = {
   method: Action.GET,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: defaultHeader
 }
 
 const fetchHttp = async (
@@ -76,7 +75,7 @@ const fetchHttp = async (
   return response
 }
 
-export function createHttp(config: Config): HttpInstance {
+export function createHttp(config: RequestConfig): HttpInstance {
   const currentConfig = mergeConfig(defaultConfig, config)
 
   const [requestInterceptors, requestInterceptorController] =

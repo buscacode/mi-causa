@@ -14,12 +14,17 @@ export type HttpData =
 export interface Config {
   method?: Action
   baseURL?: string
-  headers?: Record<string, string>
+  headers: Headers
   params?: Record<string, string>
   data?: HttpData
   signal?: AbortSignal
   cache?: RequestCache
   //body?: BodyInit
+}
+
+export interface RequestConfig
+  extends Partial<Omit<Config, 'method' | 'data' | 'headers'>> {
+  headers?: Headers | Record<string, string>
 }
 
 export type InterceptorCb<T> = (data: T) => T
@@ -42,28 +47,22 @@ export interface Interceptors {
 }
 
 export interface HttpInstance {
-  get: (
-    url: string,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
+  get: (url: string, config?: RequestConfig) => Promise<Response>
   post: (
     url: string,
     data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
+    config?: RequestConfig
   ) => Promise<Response>
   put: (
     url: string,
     data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
+    config?: RequestConfig
   ) => Promise<Response>
   patch: (
     url: string,
     data?: HttpData,
-    config?: Omit<Config, 'method' | 'data'>
+    config?: RequestConfig
   ) => Promise<Response>
-  delete: (
-    url: string,
-    config?: Omit<Config, 'method' | 'data'>
-  ) => Promise<Response>
+  delete: (url: string, config?: RequestConfig) => Promise<Response>
   interceptors: Interceptors
 }

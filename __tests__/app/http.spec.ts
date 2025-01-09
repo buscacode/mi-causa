@@ -277,11 +277,9 @@ describe('Http file', () => {
     })
 
     const interceptor1 = http.interceptors.request.use((config) => {
-      const headers = config.headers ?? {}
+      const headers = config.headers
       const token = tokenController.getToken()
-
-      headers['Authorization-token'] = `Bearer ${token}`
-      config.headers = headers
+      headers.set('Authorization-token', `Bearer ${token}`)
       return config
     })
 
