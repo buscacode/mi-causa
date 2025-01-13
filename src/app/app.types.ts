@@ -27,7 +27,7 @@ export interface RequestConfig
   headers?: Headers | Record<string, string>
 }
 
-export type InterceptorCb<T> = (data: T) => T
+export type InterceptorCb<T> = (data: T) => T | Promise<T>
 
 export type InterceptorErrorCb = (error: HttpResponseError) => HttpResponseError
 export type InterceptorQueue<T> = Array<

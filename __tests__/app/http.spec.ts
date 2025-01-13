@@ -346,4 +346,70 @@ describe('Http file', () => {
     expect(data4.body.interceptor).not.toBeDefined()
     expect(data4.authorization).toBe('Bearer token')
   })
+
+  test('should work the interceptor request with async function', async () => {
+    server.use(
+      rest.put(
+        'https://buscacode.com/api/validate-async',
+        async ({ request }) => {
+          const body = await request.json()
+          const authorization = request.headers.get('Authorization-token')
+          return HttpResponse.json({ body, authorization })
+        }
+      )
+    )
+
+    http = createHttp({ baseURL: 'https://buscacode.com/api' })
+    const tokenController = (() => {
+      let token: string | undefined
+      const wait = <T>(value: T, time = 100) =>
+        new Promise<T>((resolve) => {
+          setTimeout(() => resolve(value), time)
+        })
+      return {
+        getToken: () => token,
+        getAsyncToken: () => wait(token),
+        setToken: (newToken: string) => {
+          token = newToken
+        }
+      }
+    })()
+
+    const interceptor0 = http.interceptors.request.use(async (config) => {
+      const headers = config.headers
+      const token = await tokenController.getAsyncToken()
+      headers.set('Authorization-token', `Bearer ${token}`)
+      return config
+    })
+
+    expect(interceptor0).toBe(0)
+
+    tokenController.setToken('token_123')
+    const response = await http.put('/validate-async', {
+      dni: 33333333
+    })
+    const data2 = await response.json()
+    expect(data2.body.dni).toBe(33333333)
+    expect(data2.authorization).toBe('Bearer token_123')
+
+    tokenController.setToken('abc')
+    let response2: Response | undefined
+    let capturedError: Error | undefined
+    try {
+      response2 = await http.patch('https://buscacode.com/user', {
+        dni: 22222222
+      })
+    } catch (error) {
+      capturedError = error as Error
+      if (error instanceof HttpResponseError) {
+        response2 = error.response
+      }
+    }
+
+    if (response2 === undefined) throw Error('Without Response')
+    const data3 = await response2.json()
+    expect(data3.message).toBe('Not Authenticated')
+    expect(capturedError).toBeDefined()
+    expect(capturedError).instanceOf(HttpResponseError)
+  })
 })

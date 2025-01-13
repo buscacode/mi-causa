@@ -24,12 +24,14 @@ const fetchHttp = async (
   requestInterceptorQueue: InterceptorQueue<Config>,
   responseInterceptorQueue: InterceptorQueue<Response>
 ) => {
-  const newConfig = requestInterceptorQueue.reduce(
-    (calculatedConfig, fnArr) => {
+  const newConfig = await requestInterceptorQueue.reduce(
+    async (promise, fnArr) => {
+      const calculatedConfig = await promise
       const fn = fnArr[0]
-      return fn?.(calculatedConfig) ?? calculatedConfig
+      if (!fn) return calculatedConfig
+      return fn(calculatedConfig)
     },
-    config
+    Promise.resolve(config)
   )
 
   const fetchUrl = formatUrl(url, newConfig.baseURL)
