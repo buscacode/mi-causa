@@ -27,6 +27,11 @@ export interface RequestConfig
   headers?: Headers | Record<string, string>
 }
 
+export interface InitialConfig
+  extends Partial<Omit<Config, 'method' | 'headers'>> {
+  headers?: Headers | Record<string, string>
+}
+
 export type InterceptorCb<T> = (data: T) => T | Promise<T>
 
 export type InterceptorErrorCb = (error: HttpResponseError) => HttpResponseError

@@ -1,11 +1,11 @@
 import type {
   Config,
   HttpData,
+  HttpInstance,
+  InitialConfig,
   InterceptorQueue,
-  Interceptors,
-  RequestConfig
-} from 'src/app/app.types'
-import type { HttpInstance } from './app.types'
+  Interceptors
+} from './app.types'
 import { Action } from './enums/http.enums'
 import { HttpResponseError } from './errors/HttpResponse.error'
 import { generateInterceptor } from './interceptors'
@@ -77,7 +77,7 @@ const fetchHttp = async (
   return response
 }
 
-export function createHttp(config: RequestConfig): HttpInstance {
+export function createHttp(config: InitialConfig): HttpInstance {
   const currentConfig = mergeConfig(defaultConfig, config)
 
   const [requestInterceptors, requestInterceptorController] =

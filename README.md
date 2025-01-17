@@ -5,30 +5,33 @@ Promise based Fetch wrapper.
 ## Node js
 
 ```js
-const { http } = require('mi-causa')
+const { createHttp } = require('mi-causa')
 
+/** @type {import('mi-causa').Config} */
 const config = {
   baseURL: 'https://dummyjson.com'
 }
 
-let api = http.create(config)
+const http = createHttp(config)
 
-api
-  .get('/products')
-  .then((data) => data.json())
-  .then((data) => console.log(data))
+http
+  .get('/posts/1')
+  .then((response) => response.json())
+  .then((data) => {
+    console.log(data)
+  })
 ```
 
 ## Typescript
 
 ```ts
-import http, { type Config } from 'mi-causa'
+import { createHttp, type Config } from 'mi-causa'
 
 const config: Config = {
   baseURL: 'https://dummyjson.com/'
 }
 
-let api = http.create(config)
+let api = createHttp(config)
 
 api
   .get('/products')

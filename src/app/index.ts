@@ -1,3 +1,3 @@
-export * from './errors'
 export * from './enums'
-export * as http from './http'
+export * from './errors'
+export * from './http'

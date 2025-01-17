@@ -1,6 +1,6 @@
 import { HttpResponseError } from '@/app'
-import { createHttp } from '@/app/http'
 import type { HttpInstance } from '@/index'
+import { createHttp } from '@/index'
 import { server } from '__mocks__/services'
 import { HttpResponse, http as rest } from 'msw'
 import {

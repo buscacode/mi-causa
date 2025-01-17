@@ -1,4 +1,4 @@
-import type { Config, HttpData, RequestConfig } from 'src/app/app.types'
+import type { Config, HttpData, RequestConfig } from './app.types'
 import { HttpRequestError } from './errors/HttpRequest.error'
 import { HttpUrlError } from './errors/HttpUrl.error'
 import { doesExist } from './utils'
