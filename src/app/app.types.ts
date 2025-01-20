@@ -10,6 +10,7 @@ export type HttpData =
   | FormData
   | null
   | Record<string, string | number | null | undefined | Record<string, unknown>>
+  | BodyInit
 
 export interface Config {
   method?: Action

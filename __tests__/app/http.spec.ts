@@ -2,6 +2,8 @@ import { HttpResponseError } from '@/app'
 import type { HttpInstance } from '@/index'
 import { createHttp } from '@/index'
 import { server } from '__mocks__/services'
+import { readFileSync } from 'fs'
+
 import { HttpResponse, http as rest } from 'msw'
 import {
   afterAll,
@@ -411,5 +413,45 @@ describe('Http file', () => {
     expect(data3.message).toBe('Not Authenticated')
     expect(capturedError).toBeDefined()
     expect(capturedError).instanceOf(HttpResponseError)
+  })
+
+  test('should be able to send form data with file', async () => {
+    server.use(
+      rest.post('https://buscacode.com/api/file', async ({ request }) => {
+        const body = await request.formData()
+        const file = body.get('the_file') as File
+        if (file === null)
+          return HttpResponse.json({ message: 'no file' }, { status: 400 })
+        return HttpResponse.json({ body: Object(body) })
+      })
+    )
+
+    const filePath = './doc/overlay.png'
+    const fileBuffer = readFileSync(filePath)
+    /* const bobFile = new Blob([fileBuffer], {
+      type: 'image/png'
+    }) */
+    const file = new File([fileBuffer], 'OVERLAY.png', { type: 'image/png' })
+
+    const formData = new FormData()
+    formData.append('id', '3')
+    formData.append('name', 'name_data')
+    formData.append('the_file', file)
+    let response: Response | undefined = undefined
+    let capturedError: Error | undefined
+
+    try {
+      response = await http.post('/api/file', formData)
+    } catch (error) {
+      capturedError = error as Error
+      if (error instanceof HttpResponseError) {
+        response = error.response
+      }
+    }
+
+    if (response === undefined) throw Error('Without Response')
+    const data = await response.json()
+    expect(data).toBeDefined()
+    expect(capturedError).not.toBeDefined()
   })
 })

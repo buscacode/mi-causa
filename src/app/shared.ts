@@ -37,11 +37,17 @@ export const mergeConfig = (
   return returnConfig
 }
 
-export const defineBody = (httpData?: HttpData | null): string | undefined => {
+export const defineBody = (
+  httpData?: HttpData | null
+): string | undefined | FormData | ReadableStream => {
   if (httpData === undefined || httpData === null) return undefined
 
-  if (typeof httpData === 'string') return httpData
-
+  if (
+    typeof httpData === 'string' ||
+    httpData instanceof FormData ||
+    httpData instanceof ReadableStream
+  )
+    return httpData
   try {
     return JSON.stringify(httpData)
   } catch (error) {
