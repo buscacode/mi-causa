@@ -20,6 +20,7 @@ export interface Config {
   data?: HttpData
   signal?: AbortSignal
   cache?: RequestCache
+  credentials?: RequestCredentials
   //body?: BodyInit
 }
 

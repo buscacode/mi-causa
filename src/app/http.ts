@@ -57,7 +57,8 @@ const fetchHttp = async (
     headers: newConfig.headers,
     method: newConfig.method,
     signal: newConfig.signal,
-    cache: newConfig.cache
+    cache: newConfig.cache,
+    credentials: newConfig.credentials
   }
 
   const response = await fetch(urlFull, fetchInit)
